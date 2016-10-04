@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<!-- saved from url=(0088)file:///Users/shivekkhurana/Desktop/three.js-master/examples/canvas_particles_waves.html -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+		<title>Ad Indigo</title>
+		<meta name="keywords" content="audience intelligence, ad intelligence, social marketing, facebook ads, twitter ads, bing ads, google ads, audience tracking, marketing intelligence, marketing platform, adindigo, ad indigo">
+		<meta name="description" content="Best in class audience intelligence to superpower your online ads.">
+		
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		<style>
+			html {
+				height: 100%;
+			}
+			body {
+				background-color: #ffffff;
+				margin: 0px;
+				overflow: hidden;
+				height: 100%;
+				display: flex;
+  				align-items: center;
+			}
+
+			a {
+				color:#0078ff;
+			}
+
+			#canvas {
+				transition: opacity 2.5s ease;
+			    position: absolute;
+			    z-index: 0;
+			}
+
+			#container {
+				position: relative;
+			    z-index: 5;
+			    padding: 20px;
+			    font-family: sans-serif;
+				color: #222;
+			}
+
+			#logo {
+				font-size: 52px;
+				font-weight: 900;
+			}
+
+			#desc {
+				margin-top: 20px;
+				width: 40%;
+				margin-bottom: 20px;
+			}
+			.particle-color {
+				color: #22313F;
+			}
+
+			#cta {
+				background-color: #fff;
+				border: 1px solid #333;
+				border-radius: 2px;
+				outline: none;
+				color: #333;
+				font-size: 12px;
+				padding:2px;
+				text-decoration: none;
+			}
+
+			#cta:visited {
+				color: #333;
+			}
+
+			#cta:hover {
+				cursor: pointer;
+			}
+
+			#cta:active {
+				background: #333;
+				color: #fff;
+			}
+		</style>
+	</head>
+	<body>
+		<script src="./index_files/three.js"></script>
+
+		<script src="./index_files/Projector.js"></script>
+		<script src="./index_files/CanvasRenderer.js"></script>
+
+		<script src="./index_files/stats.min.js"></script>
+
+		<script>
+
+			var SEPARATION = 250, AMOUNTX = 40, AMOUNTY = 30;
+
+			var container, stats;
+			var camera, scene, renderer;
+
+			var particles, particle, count = 0;
+
+			var mouseX = 0, mouseY = 0;
+
+			var windowHalfX = window.innerWidth / 2;
+			var windowHalfY = window.innerHeight / 2;
+
+			var particleColor = 0x0000FF;
+			var bgColor = 0xffffff;
+
+			init();
+			animate();
+
+			function init() {
+
+				container = document.createElement( 'div' );
+				container.setAttribute("id", "canvas");
+                // container.setAttribute("style", "opacity:0;");
+                document.body.insertBefore(container, document.getElementById("container"));
+
+				camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 1, 10000 );
+				camera.position.z = 1000;
+
+				scene = new THREE.Scene();
+				particles = new Array();
+
+				var PI2 = Math.PI * 2;
+				var material = new THREE.SpriteCanvasMaterial({
+					color: particleColor,
+					program: function(context) {
+						context.beginPath();
+						context.arc( 0, 0, 0.3, 0, PI2, true );
+						context.fill();
+					}
+				});
+
+				var i = 0;
+
+				for ( var ix = 0; ix < AMOUNTX; ix ++ ) {
+
+					for ( var iy = 0; iy < AMOUNTY; iy ++ ) {
+
+						particle = particles[ i ++ ] = new THREE.Sprite( material );
+						particle.position.x = ix * SEPARATION - ( ( AMOUNTX * SEPARATION ) / 2 );
+						particle.position.z = iy * SEPARATION - ( ( AMOUNTY * SEPARATION ) / 2 );
+						scene.add( particle );
+
+					}
+
+				}
+
+				renderer = new THREE.CanvasRenderer();
+				renderer.setClearColor(bgColor);
+				renderer.setPixelRatio(window.devicePixelRatio);
+				renderer.setSize(window.innerWidth, window.innerHeight);
+				container.appendChild(renderer.domElement);
+
+				document.addEventListener('mousemove', onDocumentMouseMove, false);
+				document.addEventListener('touchstart', onDocumentTouchStart, false);
+				document.addEventListener('touchmove', onDocumentTouchMove, false);
+
+				//
+
+				window.addEventListener('resize', onWindowResize, false);
+
+			}
+
+			function onWindowResize() {
+
+				windowHalfX = window.innerWidth / 2;
+				windowHalfY = window.innerHeight / 2;
+
+				camera.aspect = window.innerWidth / window.innerHeight;
+				camera.updateProjectionMatrix();
+
+				renderer.setSize( window.innerWidth, window.innerHeight );
+
+			}
+
+			//
+
+			function onDocumentMouseMove( event ) {
+
+				mouseX = event.clientX - windowHalfX;
+				mouseY = event.clientY - windowHalfY;
+
+			}
+
+			function onDocumentTouchStart( event ) {
+
+				if ( event.touches.length === 1 ) {
+
+					event.preventDefault();
+
+					mouseX = event.touches[ 0 ].pageX - windowHalfX;
+					mouseY = event.touches[ 0 ].pageY - windowHalfY;
+
+				}
+
+			}
+
+			function onDocumentTouchMove( event ) {
+
+				if ( event.touches.length === 1 ) {
+
+					event.preventDefault();
+
+					mouseX = event.touches[ 0 ].pageX - windowHalfX;
+					mouseY = event.touches[ 0 ].pageY - windowHalfY;
+
+				}
+
+			}
+
+			//
+
+			function animate() {
+				requestAnimationFrame( animate );
+				render();
+			}
+
+			function render() {
+
+				camera.position.x += ( mouseX - camera.position.x ) * .05;
+				camera.position.y += ( - mouseY - camera.position.y ) * .05;
+				camera.lookAt(scene.position);
+
+				var i = 0;
+
+				for ( var ix = 0; ix < AMOUNTX; ix ++ ) {
+
+					for ( var iy = 0; iy < AMOUNTY; iy ++ ) {
+
+						particle = particles[ i++ ];
+						particle.position.y = ( Math.sin( ( ix + count ) * 0.3 ) * 50 ) +
+							( Math.sin( ( iy + count ) * 0.5 ) * 50 );
+						particle.scale.x = particle.scale.y = ( Math.sin( ( ix + count ) * 0.3 ) + 1 ) * 4 +
+							( Math.sin( ( iy + count ) * 0.5 ) + 1 ) * 4;
+
+					}
+
+				}
+
+				renderer.render( scene, camera );
+
+				count += 0.1;
+
+			}
+
+		</script><div id="canvas"><canvas width="1440" height="782" style="width: 1440px; height: 782px;"></canvas></div>
+		<div id="container">
+			<div id="logo">
+				Ad Indigo
+			</div>
+			<div id="desc">
+				Ad Indigo traces your customer's social footprint &amp; provides best in class audience intelligence to optimize ad placements and perfomance. 
+			</div>
+
+			<a id="cta" href="https://shivekkhurana.typeform.com/to/jaZDUb" target="_blank">
+				Request Demo
+			</a>
+		</div>
+	
+
+</body></html>
